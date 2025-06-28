@@ -18,5 +18,7 @@ router.get('/', CourseController.getAllCourses);
 router.get('/:id', CourseController.getSingleCourse);
 router.patch('/:id', auth(USER_ROLE.admin), CourseController.updateCourse);
 router.delete('/:id', auth(USER_ROLE.admin), CourseController.deleteCourse);
+router.get('/detail/:id', CourseController.getCourseDetail);
+
 
 export const CourseRoutes = router;

@@ -4,8 +4,7 @@ import { CourseService } from './course.service';
 import { catchAsync } from '../../app/utils/catchAsync';
 import sendResponse from '../../app/utils/sendResponse';
 
-export const CourseController = {
-  createCourse: catchAsync(async (req: Request, res: Response) => {
+const createCourse = catchAsync(async (req: Request, res: Response) => {
     const result = await CourseService.createCourse(req.body);
     sendResponse(res, {
       statusCode: status.CREATED,
@@ -13,9 +12,9 @@ export const CourseController = {
       message: 'Course created successfully',
       data: result,
     });
-  }),
+  });
 
-  getAllCourses: catchAsync(async (_req: Request, res: Response) => {
+  const getAllCourses = catchAsync(async (_req: Request, res: Response) => {
     const result = await CourseService.getAllCourses();
     sendResponse(res, {
       statusCode: status.OK,
@@ -23,9 +22,9 @@ export const CourseController = {
       message: 'Courses retrieved successfully',
       data: result,
     });
-  }),
+  });
 
-  getSingleCourse: catchAsync(async (req: Request, res: Response) => {
+  const getSingleCourse = catchAsync(async (req: Request, res: Response) => {
     const result = await CourseService.getSingleCourse(req.params.id);
     sendResponse(res, {
       statusCode: status.OK,
@@ -33,9 +32,9 @@ export const CourseController = {
       message: 'Course retrieved successfully',
       data: result,
     });
-  }),
+  });
 
-  updateCourse: catchAsync(async (req: Request, res: Response) => {
+  const updateCourse = catchAsync(async (req: Request, res: Response) => {
     const result = await CourseService.updateCourse(req.params.id, req.body);
     sendResponse(res, {
       statusCode: status.OK,
@@ -43,9 +42,9 @@ export const CourseController = {
       message: 'Course updated successfully',
       data: result,
     });
-  }),
+  });
 
-  deleteCourse: catchAsync(async (req: Request, res: Response) => {
+  const deleteCourse = catchAsync(async (req: Request, res: Response) => {
     const result = await CourseService.deleteCourse(req.params.id);
     sendResponse(res, {
       statusCode: status.OK,
@@ -53,5 +52,23 @@ export const CourseController = {
       message: 'Course deleted successfully',
       data: result,
     });
-  }),
+  });
+
+const getCourseDetail = catchAsync(async (req: Request, res: Response) => {
+  const result = await CourseService.getCourseDetailWithModules(req.params.id);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Course detail retrieved successfully',
+    data: result,
+  });
+});
+
+export const CourseController = {
+  createCourse,
+  getAllCourses,
+  getSingleCourse,
+  updateCourse,
+  deleteCourse,
+  getCourseDetail
 };
