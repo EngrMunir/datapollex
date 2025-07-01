@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CourseRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const course_controller_1 = require("./course.controller");
+const auth_1 = __importDefault(require("../../app/middleware/auth"));
+const user_constant_1 = require("../User/user.constant");
+const course_validation_1 = require("./course.validation");
+const validateRequest_1 = __importDefault(require("../../app/middleware/validateRequest"));
+const router = express_1.default.Router();
+router.post('/', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), (0, validateRequest_1.default)(course_validation_1.createCourseValidation), course_controller_1.CourseController.createCourse);
+router.get('/', course_controller_1.CourseController.getAllCourses);
+router.get('/detail/:id', course_controller_1.CourseController.getCourseDetail);
+router.get('/:id', course_controller_1.CourseController.getSingleCourse);
+router.patch('/:id', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), course_controller_1.CourseController.updateCourse);
+router.delete('/:id', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), course_controller_1.CourseController.deleteCourse);
+exports.CourseRoutes = router;

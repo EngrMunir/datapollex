@@ -10,4 +10,14 @@ const courseSchema = new Schema(
   { timestamps: true }
 );
 
+courseSchema.virtual('modules', {
+  ref: 'Module',
+  localField: '_id',
+  foreignField: 'courseId',
+});
+
+courseSchema.set('toObject', { virtuals: true });
+courseSchema.set('toJSON', { virtuals: true });
+
+
 export const Course = model('Course', courseSchema);

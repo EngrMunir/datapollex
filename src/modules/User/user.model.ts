@@ -1,10 +1,10 @@
 import { model, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
-import { IUser, UserModel } from './user.interface';
+import { TUser, UserModel } from './user.interface';
 import { USER_ROLE } from './user.constant';
+import bcrypt from 'bcrypt';
 import config from '../../app/config';
 
-const userSchema = new Schema<IUser, UserModel>(
+const userSchema = new Schema<TUser, UserModel>(
   {
     name: {
       type: String,
@@ -13,8 +13,10 @@ const userSchema = new Schema<IUser, UserModel>(
     email: {
       type: String,
       required: true,
-      unique: true,
-      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please provide a valid email'],
+      match: [
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        'Please provide a valid email address',
+      ],
     },
     password: {
       type: String,
@@ -23,31 +25,32 @@ const userSchema = new Schema<IUser, UserModel>(
     },
     role: {
       type: String,
-      enum: Object.values(USER_ROLE),
+      enum: [USER_ROLE.user, USER_ROLE.admin],
       default: USER_ROLE.user,
-    },
-    refreshToken: {
-      type: String,
-      select: false,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-
+// use hook to hash password before saving user
 userSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
-
-  if (user.isModified('password') && user.password) {
-    const saltRounds = Number(config.bcrypt_salt_rounds || 10);
-    user.password = await bcrypt.hash(user.password, saltRounds);
-  }
-
+  // hashing password before saving
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
   next();
 });
 
+// use hook to empty password before sending response
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
 
 // find user by using email
 userSchema.statics.isUserExistByEmail = async function (email: string) {
@@ -62,4 +65,5 @@ userSchema.statics.isPasswordMatched = async function (
   return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
 
-export const User = model<IUser, UserModel>('User', userSchema);
+
+export const User = model<TUser, UserModel>('User', userSchema);

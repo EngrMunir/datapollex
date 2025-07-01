@@ -1,12 +1,19 @@
-import express from "express";
-import { UserController } from "./user.controller";
+import { Router } from "express";
 import auth from "../../app/middleware/auth";
+import { USER_ROLE } from "./user.constant";
+import { UserController } from "./user.controller";
 
 
-const router = express.Router();
+const router = Router();
 
-router.get('/my-profile', UserController.getMyProfile);
+// router.get(
+//   '/me',
+//   auth(USER_ROLE.admin, USER_ROLE.user),
+//   UserController.getMyProfile
+// );
+router.get('/', auth(USER_ROLE.admin), UserController.getAllUsers);
+router.patch('/:id/role', auth(USER_ROLE.admin), UserController.updateUserRole);
+router.delete('/:id', auth(USER_ROLE.admin), UserController.deleteUser);
 
-router.get('/', UserController.getAllUsers);
 
 export const UserRoutes = router;

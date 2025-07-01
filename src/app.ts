@@ -9,7 +9,7 @@ app.use(express.json())
 
 app.use(
     cors({
-         origin: ['https://smartbrief-frontend.vercel.app'],
+         origin: ['http://localhost:3000'],
         credentials: true 
     }))
 

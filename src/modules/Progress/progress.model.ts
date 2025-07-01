@@ -1,9 +1,10 @@
 // progress.model.ts
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
+import { IUserProgress } from './progress.interface';
 
 const progressSchema = new Schema<IUserProgress>({
-  userId: { type: String, required: true },
-  lectureId: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  lectureId: { type: mongoose.Schema.Types.ObjectId, required: true },
   completedAt: { type: Date, default: Date.now },
 });
 

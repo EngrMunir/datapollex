@@ -5,7 +5,7 @@ export const createToken = (
     jwtPayload: { email: string; role:string},
     secret: Secret,
 ) =>{
-    return jwt.sign(jwtPayload, secret, { expiresIn:'1hr'})
+    return jwt.sign(jwtPayload, secret, { expiresIn:'1h'})
 };
 
 export const verifyToken = (token: string, secret:Secret) =>{

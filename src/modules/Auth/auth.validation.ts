@@ -29,6 +29,7 @@ const refreshTokenValidationSchema = z.object({
   }),
 });
 
+
 export const AuthValidations = {
   registerUserValidationSchema,
   loginValidationSchema,

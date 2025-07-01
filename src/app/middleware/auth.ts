@@ -11,45 +11,43 @@ import { User } from "../../modules/User/user.model";
 import jwt from 'jsonwebtoken';
 import { catchAsync } from "../utils/catchAsync";
 
-const auth = (...requiredRoles:TUserRole[])=>{
-    return catchAsync( async (req:Request, res:Response, next:NextFunction)=>{
-     
-        const token = req.headers.authorization?.split(' ')[1];
+const auth = (...requiredRoles: TUserRole[]) => {
+  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    console.log('token from auth ', token)
 
-        if(!token){
-            throw new AppError(status.UNAUTHORIZED, 'Your are not authorized!');
-        }
-       
-        let decoded;
+    if (!token) {
+      throw new AppError(status.UNAUTHORIZED, 'You are not authorized!');
+    }
 
-        try {
-            decoded = jwt.verify(
-                token,
-                config.jwt_access_secret as string
-            ) as JwtPayload;
-        } catch (error) {
-            
-            throw new AppError(status.UNAUTHORIZED,'Unauthorized');
-        }
+    let decoded;
 
-        const { role, email } = decoded;
+    try {
+      decoded = jwt.verify(
+        token,
+        config.jwt_access_secret as string
+      ) as JwtPayload;
+    } catch (error) {
+      
+      throw new AppError(status.UNAUTHORIZED, 'Unauthorized');
+    }
 
-        const user = await User.isUserExistByEmail(email);
-        if(!user){
-            throw new AppError(status.NOT_FOUND,'This user is not exist');
-        }
+    const { role, email } = decoded;
 
-       if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
-  throw new AppError(
-    status.UNAUTHORIZED,
-    'You are not authorized!!'
-  );
-}
-        req.user = user;
+    const user = await User.isUserExistByEmail(email);
+    if (!user) {
+      throw new AppError(status.NOT_FOUND, 'This user does not exist');
+    }
 
-            next();
+    if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
+      throw new AppError(status.UNAUTHORIZED, 'You are not authorized for this role!');
+    }
 
-    })
+    req.user = user;
+
+    next();
+  });
 };
+
 
 export default auth;
