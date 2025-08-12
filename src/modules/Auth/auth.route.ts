@@ -8,12 +8,6 @@ import { AuthValidations } from "./auth.validation";
 const router = Router();
 
 router.post(
-  '/logout',
-  auth(USER_ROLE.admin, USER_ROLE.user),
-  AuthControllers.logoutUser,
-);
-
-router.post(
   '/register',
   validateRequest(AuthValidations.registerUserValidationSchema),
   AuthControllers.registerUser,

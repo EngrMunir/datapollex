@@ -9,13 +9,5 @@ const moduleSchema = new Schema<IModule>(
   },
   { timestamps: true }
 );
-moduleSchema.virtual('lectures', {
-  ref: 'Lecture',
-  localField: '_id',
-  foreignField: 'moduleId',
-});
-
-moduleSchema.set('toObject', { virtuals: true });
-moduleSchema.set('toJSON', { virtuals: true });
 
 export const Module = model<IModule>('Module', moduleSchema);

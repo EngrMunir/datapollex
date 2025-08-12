@@ -6,11 +6,12 @@ const createLecture = async (payload: ILecture) => {
   return await Lecture.create({
     ...payload,
     moduleId: new Types.ObjectId(payload.moduleId),
+    courseId: new Types.ObjectId(payload.courseId),
   });
 };
 
 const getLecturesByModule = async (moduleId: string) => {
-  return await Lecture.find({ moduleId }).sort({ createdAt: 1 });
+  return await Lecture.find({ moduleId }).sort({ lectureNumber: 1 });
 };
 
 const updateLecture = async (id: string, data: Partial<ILecture>) => {

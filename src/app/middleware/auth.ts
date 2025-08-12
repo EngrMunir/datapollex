@@ -14,7 +14,7 @@ import { catchAsync } from "../utils/catchAsync";
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1];
-    console.log('token from auth ', token)
+    // console.log('token from auth ', token)
 
     if (!token) {
       throw new AppError(status.UNAUTHORIZED, 'You are not authorized!');

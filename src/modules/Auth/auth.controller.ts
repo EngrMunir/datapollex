@@ -4,6 +4,20 @@ import { catchAsync } from '../../app/utils/catchAsync';
 import config from '../../app/config';
 import sendResponse from '../../app/utils/sendResponse';
 
+
+// Register user
+const registerUser = catchAsync(async (req, res) => {
+  const result = await AuthService.registerUser(req.body);
+
+  // Send Response
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: 'User is registered successfully!',
+    data: result,
+  });
+});
+
 // Login user
 const loginUser = catchAsync(async (req, res) => {
 const result = await AuthService.loginUser(req.body);
@@ -26,19 +40,6 @@ const result = await AuthService.loginUser(req.body);
   });
 });
 
-// Register user
-const registerUser = catchAsync(async (req, res) => {
-  const result = await AuthService.registerUser(req.body);
-
-  // Send Response
-  sendResponse(res, {
-    statusCode: status.CREATED,
-    success: true,
-    message: 'User is registered successfully!',
-    data: result,
-  });
-});
-
 // refresh token
 const refreshToken = catchAsync(async (req, res) => {
   const { refreshToken } = req.cookies;
@@ -52,36 +53,9 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
-const logoutUser = catchAsync(async (req, res) => {
-  const { refreshToken } = req.cookies;
-
-  if (!refreshToken) {
-    return sendResponse(res, {
-      statusCode: status.BAD_REQUEST,
-      success: false,
-      message: 'Refresh token not found',
-      data: null,
-    });
-  }
-  await AuthService.logoutUser(refreshToken);
-
-  res.clearCookie('refreshToken', {
-    secure: config.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
-  });
-
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: 'User is logged out successfully!',
-    data: null,
-  });
-});
 
 export const AuthControllers = {
   loginUser,
   registerUser,
   refreshToken,
-  logoutUser,
 };

@@ -6,18 +6,9 @@ const courseSchema = new Schema(
     thumbnail: { type: String, required: true },
     price: { type: Number, required: true },
     description: { type: String, required: true },
+    published: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
-
-courseSchema.virtual('modules', {
-  ref: 'Module',
-  localField: '_id',
-  foreignField: 'courseId',
-});
-
-courseSchema.set('toObject', { virtuals: true });
-courseSchema.set('toJSON', { virtuals: true });
-
 
 export const Course = model('Course', courseSchema);

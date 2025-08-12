@@ -4,6 +4,5 @@ export interface ICourse {
   thumbnail: string;
   price: number;
   description: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  published?: boolean;
 }

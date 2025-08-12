@@ -54,21 +54,10 @@ const createCourse = catchAsync(async (req: Request, res: Response) => {
     });
   });
 
-const getCourseDetail = catchAsync(async (req: Request, res: Response) => {
-  const result = await CourseService.getCourseDetailWithModules(req.params.id);
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: 'Course detail retrieved successfully',
-    data: result,
-  });
-});
-
 export const CourseController = {
   createCourse,
   getAllCourses,
   getSingleCourse,
   updateCourse,
   deleteCourse,
-  getCourseDetail
 };
