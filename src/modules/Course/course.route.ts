@@ -10,6 +10,8 @@ const router = express.Router();
 
 router.get('/', CourseController.getAllCourses);
 router.get('/:id', CourseController.getSingleCourse);
+router.get('/detail/:courseId',CourseController.getCourseDetails );
+
 
 router.post(
   '/',

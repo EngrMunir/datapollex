@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export interface ICourse {
   _id?: string;
   title: string;
@@ -5,4 +7,5 @@ export interface ICourse {
   price: number;
   description: string;
   published?: boolean;
+  modules: Types.ObjectId[];
 }

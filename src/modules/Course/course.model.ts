@@ -7,6 +7,10 @@ const courseSchema = new Schema(
     price: { type: Number, required: true },
     description: { type: String, required: true },
     published: { type: Boolean, default: true },
+    modules: [{ 
+          type: Schema.Types.ObjectId, 
+          ref: 'Module'
+        }]
   },
   { timestamps: true }
 );

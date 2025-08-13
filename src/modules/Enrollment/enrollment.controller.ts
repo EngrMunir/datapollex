@@ -1,10 +1,11 @@
-// controller/enrollment.controller.ts
 import { Request, Response } from 'express';
 import sendResponse from '../../app/utils/sendResponse';
 import status from 'http-status';
 import { Enrollment } from './enrollment.modal';
 import { catchAsync } from '../../app/utils/catchAsync';
 import { Course } from '../Course/course.model';
+import { Module } from '../Module/module.model';
+import { Lecture } from '../Lecture/lecture.model';
 
 export const enrollCourse = async (req: Request, res: Response) => {
   const userId = (req as any).user._id;
@@ -41,28 +42,19 @@ export const enrollCourse = async (req: Request, res: Response) => {
 const getMyEnrollments = catchAsync(async (req: Request, res: Response) => {
   const userId = (req as any).user._id;
 
-  // Fetch enrollment for the user and populate courseIds with full course data
-  const enrolledData = await Enrollment.findOne({ userId });
+  // Fetch enrollment for the user and populate courseIds with full course data including modules and lectures
+  const enrolledCourse = await Enrollment.findOne({ userId })
+  const enrolledCourseIds = enrolledCourse?.courseIds
 
-   if (!enrolledData) {
-    return sendResponse(res, {
-      statusCode: status.NOT_FOUND,
-      success: false,
-      message: 'No enrollments found for this user',
-      data: [],
-    });
-  }
+  const result = await Course.find({_id: {$in: enrolledCourseIds}})
   
-   const courseIds = enrolledData.courseIds;
-  
-   const courses = await Course.find({ _id: { $in: courseIds } });
+   sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: 'Lecture deleted successfully',
+      data: result,
+    });        
 
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: 'Enrolled courses fetched successfully',
-    data: courses,
-  })
 });
 
-export const EnrollmentController = { enrollCourse, getMyEnrollments };
+export const EnrollmentController = { getMyEnrollments, enrollCourse };

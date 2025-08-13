@@ -5,6 +5,8 @@ export interface IModule {
   courseId: Types.ObjectId;
   title: string;
   moduleNumber: number;
+  lectures: Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
 }
+ 

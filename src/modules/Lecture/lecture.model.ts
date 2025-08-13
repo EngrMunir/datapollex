@@ -11,6 +11,6 @@ const lectureSchema = new Schema<ILecture>(
     lectureNumber: { type: Number, required: true },
   },
   { timestamps: true }
-);
+); 
 
 export const Lecture = model<ILecture>('Lecture', lectureSchema);

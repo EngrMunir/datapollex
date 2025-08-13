@@ -1,6 +1,7 @@
 import { Module } from './module.model';
 import { IModule } from './module.interface';
 import { Types } from 'mongoose';
+import { Course } from '../Course/course.model';
 
 const createModule = async (payload: { courseId: string; title: string }) => {
   const existingModules = await Module.find({ courseId: payload.courseId });
@@ -11,6 +12,17 @@ const createModule = async (payload: { courseId: string; title: string }) => {
     title: payload.title,
     moduleNumber,
   });
+  // Step 2: Find the module by moduleId and add the new lecture ID to the `lectures` field
+    const course = await Course.findById(payload.courseId);
+    if (!course) {
+      throw new Error('Course not found');
+    }
+
+    // Add the new lecture's ID to the module's `lectures` array
+    course.modules.push(new Types.ObjectId(result._id));
+
+    // Step 3: Save the updated module with the new lecture ID added
+    await course.save();
 
   return result;
 };
