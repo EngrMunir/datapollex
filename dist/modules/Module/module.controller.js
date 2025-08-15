@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModuleController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
+const mongoose_1 = require("mongoose");
 const module_service_1 = require("./module.service");
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const catchAsync_1 = require("../../app/utils/catchAsync");
@@ -28,6 +29,14 @@ const createModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
 }));
 const getModulesByCourse = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { courseId } = req.params;
+    if (!(0, mongoose_1.isValidObjectId)(courseId)) {
+        return (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.BAD_REQUEST,
+            success: false,
+            message: 'Invalid courseId',
+            data: null,
+        });
+    }
     const result = yield module_service_1.ModuleService.getModulesByCourse(courseId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -36,8 +45,18 @@ const getModulesByCourse = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(
         data: result,
     });
 }));
+// UPDATED: supports GET /modules?courseId=<id>
 const getAllModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield module_service_1.ModuleService.getAllModule();
+    const { courseId } = req.query;
+    if (courseId && !(0, mongoose_1.isValidObjectId)(courseId)) {
+        return (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.BAD_REQUEST,
+            success: false,
+            message: 'Invalid courseId',
+            data: null,
+        });
+    }
+    const result = yield module_service_1.ModuleService.getAllModule(courseId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -70,5 +89,5 @@ exports.ModuleController = {
     getModulesByCourse,
     getAllModule,
     updateModule,
-    deleteModule
+    deleteModule,
 };

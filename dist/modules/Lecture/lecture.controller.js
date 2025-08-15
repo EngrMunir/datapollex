@@ -14,9 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LectureController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
+const mongoose_1 = require("mongoose");
 const lecture_service_1 = require("./lecture.service");
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const catchAsync_1 = require("../../app/utils/catchAsync");
+const toOid = (id) => id && (0, mongoose_1.isValidObjectId)(id) ? new mongoose_1.Types.ObjectId(id) : undefined;
 const createLecture = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield lecture_service_1.LectureService.createLecture(req.body);
     (0, sendResponse_1.default)(res, {
@@ -27,7 +29,16 @@ const createLecture = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 
     });
 }));
 const getLecturesByModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield lecture_service_1.LectureService.getLecturesByModule(req.params.moduleId);
+    const m = toOid(req.params.moduleId);
+    if (!m) {
+        return (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.BAD_REQUEST,
+            success: false,
+            message: 'Invalid moduleId',
+            data: null,
+        });
+    }
+    const result = yield lecture_service_1.LectureService.getLectures({ module: m });
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -36,12 +47,32 @@ const getLecturesByModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter
     });
 }));
 const getLectures = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { course, module } = req.query;
+    // Prefer courseId/moduleId; fall back to course/module for compatibility
+    const { courseId, moduleId, course, module } = req.query;
+    const c = toOid(courseId !== null && courseId !== void 0 ? courseId : course);
+    const m = toOid(moduleId !== null && moduleId !== void 0 ? moduleId : module);
+    if ((courseId !== null && courseId !== void 0 ? courseId : course) && !c) {
+        return (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.BAD_REQUEST,
+            success: false,
+            message: 'Invalid courseId',
+            data: null,
+        });
+    }
+    if ((moduleId !== null && moduleId !== void 0 ? moduleId : module) && !m) {
+        return (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.BAD_REQUEST,
+            success: false,
+            message: 'Invalid moduleId',
+            data: null,
+        });
+    }
     const filters = {};
-    if (course)
-        filters.course = course;
-    if (module)
-        filters.module = module;
+    if (c)
+        filters.course = c;
+    if (m)
+        filters.module = m;
+    // Service will handle populate/sort
     const result = yield lecture_service_1.LectureService.getLectures(filters);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

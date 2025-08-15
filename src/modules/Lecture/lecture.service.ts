@@ -4,31 +4,20 @@ import { Types } from 'mongoose';
 import { Module } from '../Module/module.model';
 
 const toOid = (v: any): Types.ObjectId | undefined => {
-  try {
-    return v ? new Types.ObjectId(String(v)) : undefined;
-  } catch {
-    return undefined;
-  }
+  try { return v ? new Types.ObjectId(String(v)) : undefined; } catch { return undefined; }
 };
 
 const createLecture = async (payload: ILecture) => {
   try {
-    const moduleOid = toOid((payload as any).moduleId);
-    const courseOid = toOid((payload as any).courseId);
-
-    if (!moduleOid || !courseOid) {
-      throw new Error('courseId and moduleId are required and must be valid ObjectIds');
-    }
-
     const newLecture = await Lecture.create({
-      ...payload,
-      moduleId: moduleOid,
-      courseId: courseOid,
+      ...payload,                                       // ✅ videoUrl unchanged
+      moduleId: new Types.ObjectId(payload.moduleId),
+      courseId: new Types.ObjectId(payload.courseId),
     });
 
-    // Attach to module (avoid duplicates)
+    // ✅ keep module.lectures in sync, avoid duplicates
     await Module.updateOne(
-      { _id: moduleOid },
+      { _id: payload.moduleId },
       { $addToSet: { lectures: newLecture._id } }
     );
 
@@ -44,47 +33,43 @@ const getLecturesByModule = async (moduleId: string) => {
   if (!m) throw new Error('Invalid moduleId');
 
   return Lecture.find({ moduleId: m })
-    .populate('courseId', 'title') // {_id, title}
-    .populate('moduleId', 'title')
+    .populate('courseId')   // full doc if you want; or ', "title"' if you prefer only title
+    .populate('moduleId')
     .sort({ lectureNumber: 1 })
     .lean();
 };
 
-/**
- * filters may contain:
- *  - courseId / moduleId (preferred), or
- *  - course / module (legacy)
- */
 const getLectures = async (filters: any) => {
   try {
+    // ✅ accept both courseId/moduleId (new) and course/module (legacy)
     const query: Record<string, any> = {};
-
     const c = toOid(filters.courseId ?? filters.course);
     const m = toOid(filters.moduleId ?? filters.module);
     if (c) query.courseId = c;
     if (m) query.moduleId = m;
 
     const lectures = await Lecture.find(query)
-      .populate('courseId', 'title') // only title is needed by UI
-      .populate('moduleId', 'title')
+      .populate('courseId')  // keep as-is; your frontend handles populated objects
+      .populate('moduleId')
       .sort({ lectureNumber: 1 })
       .lean();
 
     return lectures;
-  } catch (err) {
+  } catch (err: any) {
     throw new Error('Error fetching lectures');
   }
 };
 
 const updateLecture = async (id: string, data: Partial<ILecture>) => {
-  return Lecture.findByIdAndUpdate(id, data, { new: true })
-    .populate('courseId', 'title')
-    .populate('moduleId', 'title')
+  const result = await Lecture.findByIdAndUpdate(id, data, { new: true })
+    .populate('courseId')
+    .populate('moduleId')
     .lean();
+  return result;
 };
 
 const deleteLecture = async (id: string) => {
-  // Also detach from parent module to keep data consistent
+  // ✅ also detach from parent module to keep data consistent
   const deleted = await Lecture.findByIdAndDelete(id).lean();
   if (deleted?.moduleId) {
     await Module.updateOne(
