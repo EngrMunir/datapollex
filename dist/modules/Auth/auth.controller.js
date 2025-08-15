@@ -18,7 +18,15 @@ const auth_service_1 = require("./auth.service");
 const catchAsync_1 = require("../../app/utils/catchAsync");
 const config_1 = __importDefault(require("../../app/config"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
-// Login user
+const registerUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield auth_service_1.AuthService.registerUser(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.CREATED,
+        success: true,
+        message: 'User is registered successfully!',
+        data: result,
+    });
+}));
 const loginUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield auth_service_1.AuthService.loginUser(req.body);
     const { accessToken, refreshToken } = result;
@@ -28,7 +36,6 @@ const loginUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, v
         sameSite: config_1.default.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60 * 24 * 7,
     });
-    // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -36,18 +43,6 @@ const loginUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, v
         data: { accessToken },
     });
 }));
-// Register user
-const registerUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield auth_service_1.AuthService.registerUser(req.body);
-    // Send Response
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.CREATED,
-        success: true,
-        message: 'User is registered successfully!',
-        data: result,
-    });
-}));
-// refresh token
 const refreshToken = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { refreshToken } = req.cookies;
     const result = yield auth_service_1.AuthService.refreshToken(refreshToken);
@@ -58,32 +53,8 @@ const refreshToken = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
-const logoutUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { refreshToken } = req.cookies;
-    if (!refreshToken) {
-        return (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.BAD_REQUEST,
-            success: false,
-            message: 'Refresh token not found',
-            data: null,
-        });
-    }
-    yield auth_service_1.AuthService.logoutUser(refreshToken);
-    res.clearCookie('refreshToken', {
-        secure: config_1.default.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: config_1.default.NODE_ENV === 'production' ? 'none' : 'lax',
-    });
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: 'User is logged out successfully!',
-        data: null,
-    });
-}));
 exports.AuthControllers = {
     loginUser,
     registerUser,
     refreshToken,
-    logoutUser,
 };

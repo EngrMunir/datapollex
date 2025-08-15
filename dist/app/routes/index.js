@@ -9,7 +9,6 @@ const auth_route_1 = require("../../modules/Auth/auth.route");
 const course_route_1 = require("../../modules/Course/course.route");
 const module_route_1 = require("../../modules/Module/module.route");
 const lecture_route_1 = require("../../modules/Lecture/lecture.route");
-const progress_route_1 = require("../../modules/Progress/progress.route");
 const enrollment_route_1 = require("../../modules/Enrollment/enrollment.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
@@ -32,10 +31,6 @@ const moduleRoutes = [
     {
         path: '/lectures',
         route: lecture_route_1.LectureRoutes
-    },
-    {
-        path: '/progress',
-        route: progress_route_1.ProgressRoutes
     },
     {
         path: '/enrollments',

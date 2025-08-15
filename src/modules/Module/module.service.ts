@@ -1,47 +1,78 @@
 import { Module } from './module.model';
 import { IModule } from './module.interface';
-import { Types } from 'mongoose';
+import { Types, isValidObjectId } from 'mongoose';
 import { Course } from '../Course/course.model';
 
+const toOid = (id: string) =>
+  isValidObjectId(id) ? new Types.ObjectId(id) : undefined;
+
 const createModule = async (payload: { courseId: string; title: string }) => {
-  const existingModules = await Module.find({ courseId: payload.courseId });
-  const moduleNumber = existingModules.length + 1;
+  const courseOid = toOid(payload.courseId);
+  if (!courseOid) throw new Error('Invalid courseId');
+
+  // safer than .find().length in concurrent scenarios
+  const count = await Module.countDocuments({ courseId: courseOid });
+  const moduleNumber = count + 1;
 
   const result = await Module.create({
-    courseId: new Types.ObjectId(payload.courseId),
+    courseId: courseOid,
     title: payload.title,
     moduleNumber,
   });
-  // Step 2: Find the module by moduleId and add the new lecture ID to the `lectures` field
-    const course = await Course.findById(payload.courseId);
-    if (!course) {
-      throw new Error('Course not found');
-    }
 
-    // Add the new lecture's ID to the module's `lectures` array
-    course.modules.push(new Types.ObjectId(result._id));
-
-    // Step 3: Save the updated module with the new lecture ID added
-    await course.save();
+  // keep Course.modules synced; avoid duplicates
+  await Course.updateOne({ _id: courseOid }, { $addToSet: { modules: result._id } });
 
   return result;
 };
 
 const getModulesByCourse = async (courseId: string) => {
-  return await Module.find({ courseId }).sort({ moduleNumber: 1 });
+  const c = toOid(courseId);
+  if (!c) throw new Error('Invalid courseId');
+
+  return Module.find({ courseId: c })
+    .select('_id title courseId moduleNumber')
+    .sort({ moduleNumber: 1 })
+    .lean();
+};
+
+// UPDATED: supports /modules?courseId=<id> (server-side filtering)
+const getAllModule = async (courseId?: string) => {
+  const filter: Record<string, any> = {};
+  if (courseId) {
+    const c = toOid(courseId);
+    if (!c) throw new Error('Invalid courseId');
+    filter.courseId = c;
+  }
+
+  return Module.find(filter)
+    .select('_id title courseId moduleNumber')
+    .sort({ moduleNumber: 1, createdAt: -1 })
+    .lean();
 };
 
 const updateModule = async (id: string, data: Partial<IModule>) => {
-  return await Module.findByIdAndUpdate(id, data, { new: true });
+  return Module.findByIdAndUpdate(id, data, { new: true })
+    .select('_id title courseId moduleNumber')
+    .lean();
 };
 
 const deleteModule = async (id: string) => {
-  return await Module.findByIdAndDelete(id);
+  // also detach from Course.modules to keep data consistent
+  const deleted = await Module.findByIdAndDelete(id).lean();
+  if (deleted?.courseId) {
+    await Course.updateOne(
+      { _id: deleted.courseId },
+      { $pull: { modules: deleted._id } }
+    );
+  }
+  return deleted;
 };
 
 export const ModuleService = {
   createModule,
   getModulesByCourse,
+  getAllModule,
   updateModule,
   deleteModule,
 };

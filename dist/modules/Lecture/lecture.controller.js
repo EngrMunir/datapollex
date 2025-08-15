@@ -35,6 +35,21 @@ const getLecturesByModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter
         data: result,
     });
 }));
+const getLectures = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { course, module } = req.query;
+    const filters = {};
+    if (course)
+        filters.course = course;
+    if (module)
+        filters.module = module;
+    const result = yield lecture_service_1.LectureService.getLectures(filters);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Lectures fetched successfully',
+        data: result,
+    });
+}));
 const updateLecture = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield lecture_service_1.LectureService.updateLecture(req.params.id, req.body);
     (0, sendResponse_1.default)(res, {
@@ -56,6 +71,7 @@ const deleteLecture = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 
 exports.LectureController = {
     createLecture,
     getLecturesByModule,
+    getLectures,
     updateLecture,
-    deleteLecture
+    deleteLecture,
 };

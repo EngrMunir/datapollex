@@ -7,12 +7,10 @@ const courseSchema = new mongoose_1.Schema({
     thumbnail: { type: String, required: true },
     price: { type: Number, required: true },
     description: { type: String, required: true },
+    published: { type: Boolean, default: true },
+    modules: [{
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: 'Module'
+        }]
 }, { timestamps: true });
-courseSchema.virtual('modules', {
-    ref: 'Module',
-    localField: '_id',
-    foreignField: 'courseId',
-});
-courseSchema.set('toObject', { virtuals: true });
-courseSchema.set('toJSON', { virtuals: true });
 exports.Course = (0, mongoose_1.model)('Course', courseSchema);

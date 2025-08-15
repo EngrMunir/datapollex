@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModuleService = void 0;
 const module_model_1 = require("./module.model");
 const mongoose_1 = require("mongoose");
+const course_model_1 = require("../Course/course.model");
 const createModule = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const existingModules = yield module_model_1.Module.find({ courseId: payload.courseId });
     const moduleNumber = existingModules.length + 1;
@@ -20,10 +21,19 @@ const createModule = (payload) => __awaiter(void 0, void 0, void 0, function* ()
         title: payload.title,
         moduleNumber,
     });
+    const course = yield course_model_1.Course.findById(payload.courseId);
+    if (!course) {
+        throw new Error('Course not found');
+    }
+    course.modules.push(new mongoose_1.Types.ObjectId(result._id));
+    yield course.save();
     return result;
 });
 const getModulesByCourse = (courseId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield module_model_1.Module.find({ courseId }).sort({ moduleNumber: 1 });
+});
+const getAllModule = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield module_model_1.Module.find();
 });
 const updateModule = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     return yield module_model_1.Module.findByIdAndUpdate(id, data, { new: true });
@@ -35,5 +45,6 @@ exports.ModuleService = {
     createModule,
     getModulesByCourse,
     updateModule,
+    getAllModule,
     deleteModule,
 };

@@ -12,4 +12,5 @@ const enrollment_controller_1 = require("./enrollment.controller");
 const router = express_1.default.Router();
 router.post('/', (0, auth_1.default)(user_constant_1.USER_ROLE.user), enrollment_controller_1.EnrollmentController.enrollCourse);
 router.get('/', (0, auth_1.default)(user_constant_1.USER_ROLE.user), enrollment_controller_1.EnrollmentController.getMyEnrollments);
+router.get('/enrolledCourse', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), enrollment_controller_1.EnrollmentController.enrolledCourse);
 exports.EnrollmentRoutes = router;

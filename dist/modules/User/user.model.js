@@ -43,28 +43,23 @@ const userSchema = new mongoose_1.Schema({
 }, {
     timestamps: true,
 });
-// use hook to hash password before saving user
 userSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const user = this;
-        // hashing password before saving
         user.password = yield bcrypt_1.default.hash(user.password, Number(config_1.default.bcrypt_salt_rounds));
         next();
     });
 });
-// use hook to empty password before sending response
 userSchema.post('save', function (doc, next) {
     doc.password = '';
     next();
 });
-// find user by using email
 userSchema.statics.isUserExistByEmail = function (email) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield this.findOne({ email }).select('+password');
     });
 };
-// Check if password is correct or not
 userSchema.statics.isPasswordMatched = function (plainTextPassword, hashedPassword) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield bcrypt_1.default.compare(plainTextPassword, hashedPassword);

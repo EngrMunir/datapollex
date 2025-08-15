@@ -12,6 +12,7 @@ const validateRequest_1 = __importDefault(require("../../app/middleware/validate
 const module_validation_1 = require("./module.validation");
 const router = express_1.default.Router();
 router.post('/', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), (0, validateRequest_1.default)(module_validation_1.createModuleValidation), module_controller_1.ModuleController.createModule);
+router.get('/', module_controller_1.ModuleController.getAllModule);
 router.get('/:courseId', module_controller_1.ModuleController.getModulesByCourse);
 router.patch('/:id', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), module_controller_1.ModuleController.updateModule);
 router.delete('/:id', (0, auth_1.default)(user_constant_1.USER_ROLE.admin), module_controller_1.ModuleController.deleteModule);

@@ -36,6 +36,15 @@ const getModulesByCourse = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(
         data: result,
     });
 }));
+const getAllModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield module_service_1.ModuleService.getAllModule();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Modules fetched successfully',
+        data: result,
+    });
+}));
 const updateModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const result = yield module_service_1.ModuleService.updateModule(id, req.body);
@@ -59,6 +68,7 @@ const deleteModule = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
 exports.ModuleController = {
     createModule,
     getModulesByCourse,
+    getAllModule,
     updateModule,
     deleteModule
 };

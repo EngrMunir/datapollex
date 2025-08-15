@@ -13,7 +13,7 @@ router.post(
   validateRequest(createLectureValidation),
   LectureController.createLecture
 );
-
+router.get('/', auth(USER_ROLE.admin), LectureController.getLectures);
 router.get('/:moduleId', LectureController.getLecturesByModule);
 router.patch('/:id', auth(USER_ROLE.admin), LectureController.updateLecture);
 router.delete('/:id', auth(USER_ROLE.admin), LectureController.deleteLecture);

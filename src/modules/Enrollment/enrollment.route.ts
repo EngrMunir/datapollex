@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post('/', auth(USER_ROLE.user), EnrollmentController.enrollCourse);
 router.get('/', auth(USER_ROLE.user), EnrollmentController.getMyEnrollments);
+router.get('/enrolledCourse', auth(USER_ROLE.admin), EnrollmentController.enrolledCourse);
 
 
 export const EnrollmentRoutes = router;

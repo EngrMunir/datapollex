@@ -3,29 +3,36 @@ import { ILecture } from './lecture.interface';
 import { Types } from 'mongoose';
 import { Module } from '../Module/module.model';
 
-// Create a new lecture and associate it with a module, and update the module's `lectures` array
+const toOid = (v: any): Types.ObjectId | undefined => {
+  try {
+    return v ? new Types.ObjectId(String(v)) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const createLecture = async (payload: ILecture) => {
   try {
-    // Step 1: Create the new lecture and associate it with the module using moduleId
-    const newLecture = await Lecture.create({
-      ...payload,
-      moduleId: new Types.ObjectId(payload.moduleId), // Convert moduleId to ObjectId
-      courseId: new Types.ObjectId(payload.courseId),  // Convert courseId to ObjectId
-    });
+    const moduleOid = toOid((payload as any).moduleId);
+    const courseOid = toOid((payload as any).courseId);
 
-    // Step 2: Find the module by moduleId and add the new lecture ID to the `lectures` field
-    const module = await Module.findById(payload.moduleId);
-    if (!module) {
-      throw new Error('Module not found');
+    if (!moduleOid || !courseOid) {
+      throw new Error('courseId and moduleId are required and must be valid ObjectIds');
     }
 
-    // Add the new lecture's ID to the module's `lectures` array
-    module.lectures.push(newLecture._id);
+    const newLecture = await Lecture.create({
+      ...payload,
+      moduleId: moduleOid,
+      courseId: courseOid,
+    });
 
-    // Step 3: Save the updated module with the new lecture ID added
-    await module.save();
+    // Attach to module (avoid duplicates)
+    await Module.updateOne(
+      { _id: moduleOid },
+      { $addToSet: { lectures: newLecture._id } }
+    );
 
-    return newLecture; // Return the created lecture
+    return newLecture;
   } catch (error) {
     console.error(error);
     throw new Error('Error creating and associating lecture with module');
@@ -33,20 +40,65 @@ const createLecture = async (payload: ILecture) => {
 };
 
 const getLecturesByModule = async (moduleId: string) => {
-  return await Lecture.find({ moduleId }).sort({ lectureNumber: 1 });
+  const m = toOid(moduleId);
+  if (!m) throw new Error('Invalid moduleId');
+
+  return Lecture.find({ moduleId: m })
+    .populate('courseId', 'title') // {_id, title}
+    .populate('moduleId', 'title')
+    .sort({ lectureNumber: 1 })
+    .lean();
+};
+
+/**
+ * filters may contain:
+ *  - courseId / moduleId (preferred), or
+ *  - course / module (legacy)
+ */
+const getLectures = async (filters: any) => {
+  try {
+    const query: Record<string, any> = {};
+
+    const c = toOid(filters.courseId ?? filters.course);
+    const m = toOid(filters.moduleId ?? filters.module);
+    if (c) query.courseId = c;
+    if (m) query.moduleId = m;
+
+    const lectures = await Lecture.find(query)
+      .populate('courseId', 'title') // only title is needed by UI
+      .populate('moduleId', 'title')
+      .sort({ lectureNumber: 1 })
+      .lean();
+
+    return lectures;
+  } catch (err) {
+    throw new Error('Error fetching lectures');
+  }
 };
 
 const updateLecture = async (id: string, data: Partial<ILecture>) => {
-  return await Lecture.findByIdAndUpdate(id, data, { new: true });
+  return Lecture.findByIdAndUpdate(id, data, { new: true })
+    .populate('courseId', 'title')
+    .populate('moduleId', 'title')
+    .lean();
 };
 
 const deleteLecture = async (id: string) => {
-  return await Lecture.findByIdAndDelete(id);
+  // Also detach from parent module to keep data consistent
+  const deleted = await Lecture.findByIdAndDelete(id).lean();
+  if (deleted?.moduleId) {
+    await Module.updateOne(
+      { _id: deleted.moduleId },
+      { $pull: { lectures: deleted._id } }
+    );
+  }
+  return deleted;
 };
 
 export const LectureService = {
   createLecture,
   getLecturesByModule,
+  getLectures,
   updateLecture,
   deleteLecture,
 };

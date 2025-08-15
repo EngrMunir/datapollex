@@ -14,6 +14,7 @@ router.post(
   ModuleController.createModule
 );
 
+router.get('/', ModuleController.getAllModule);
 router.get('/:courseId', ModuleController.getModulesByCourse);
 router.patch('/:id', auth(USER_ROLE.admin), ModuleController.updateModule);
 router.delete('/:id', auth(USER_ROLE.admin), ModuleController.deleteModule);

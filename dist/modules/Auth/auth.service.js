@@ -61,13 +61,8 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
         accessToken,
     };
 });
-const logoutUser = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.findOneAndUpdate({ refreshToken }, { refreshToken: null }, { new: true });
-    return result;
-});
 exports.AuthService = {
     registerUser,
     loginUser,
     refreshToken,
-    logoutUser,
 };

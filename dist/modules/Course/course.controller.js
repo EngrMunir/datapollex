@@ -36,7 +36,7 @@ const getAllCourses = (0, catchAsync_1.catchAsync)((_req, res) => __awaiter(void
     });
 }));
 const getSingleCourse = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield course_service_1.CourseService.getSingleCourse(req.params.id);
+    const result = yield course_service_1.CourseService.getSingleCourse(req.params.courseId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -62,20 +62,10 @@ const deleteCourse = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
-const getCourseDetail = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield course_service_1.CourseService.getCourseDetailWithModules(req.params.id);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: 'Course detail retrieved successfully',
-        data: result,
-    });
-}));
 exports.CourseController = {
     createCourse,
     getAllCourses,
     getSingleCourse,
     updateCourse,
     deleteCourse,
-    getCourseDetail
 };

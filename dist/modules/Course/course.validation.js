@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCourseValidation = void 0;
+exports.updateCourseSchema = exports.createCourseValidation = void 0;
 const zod_1 = require("zod");
 exports.createCourseValidation = zod_1.z.object({
     body: zod_1.z.object({
@@ -8,5 +8,15 @@ exports.createCourseValidation = zod_1.z.object({
         thumbnail: zod_1.z.string({ required_error: 'Thumbnail is required' }),
         price: zod_1.z.number({ required_error: 'Price is required' }),
         description: zod_1.z.string({ required_error: 'Description is required' }),
+        published: zod_1.z.boolean().optional()
+    }),
+});
+exports.updateCourseSchema = zod_1.z.object({
+    body: zod_1.z.object({
+        thumbnailUrl: zod_1.z.string().url().optional(),
+        title: zod_1.z.string().min(2).optional(),
+        price: zod_1.z.number().nonnegative().optional(),
+        description: zod_1.z.string().min(10).optional(),
+        published: zod_1.z.boolean().optional(),
     }),
 });
